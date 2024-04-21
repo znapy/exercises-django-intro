@@ -1,0 +1,27 @@
+config:
+  cloud-init.user-data: |
+    #cloud-config
+    packages:
+      - postgresql
+      - openssl
+      - python3.11
+      - python3-pip
+    runcmd:
+      - |
+        # Database settings for django
+        useradd --system --user-group  django
+        PASS=$(openssl rand -hex 32)
+        echo "password for postgresql user 'django' is '$PASS'"
+        sudo -u postgres psql -c '\x' -c "CREATE USER django CREATEDB PASSWORD '$PASS';"
+        touch /root/.pgpass
+        chmod 600 /root/.pgpass
+        echo "127.0.0.1:5432:*:django:$PASS" > /root/.pgpass
+        # Install Django
+        #   there is problem to install in python3.12, so commented and install in 3.11 - it's quicker but no so quick as `apt install python3-django`:
+        #add-apt-repository --yes ppa:deadsnakes/ppa
+        #apt update
+        #apt install --yes python3.12 python3.12-{tk,dev,dbg,venv,gdbm,distutils}
+        #pip install --yes --upgrade setuptools
+        #   so install python3.11   
+        python3.11 -m pip install Django
+
