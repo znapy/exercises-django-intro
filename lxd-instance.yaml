@@ -1,4 +1,6 @@
 config:
+  limits.cpu: '2'
+  limits.memory: 256MB
   cloud-init.user-data: |
     #cloud-config
     packages:
@@ -11,7 +13,6 @@ config:
         # Database settings for django
         useradd --system --user-group  django
         PASS=$(openssl rand -hex 32)
-        echo "password for postgresql user 'django' is '$PASS'"
         sudo -u postgres psql -c '\x' -c "CREATE USER django CREATEDB PASSWORD '$PASS';"
         touch /root/.pgpass
         chmod 600 /root/.pgpass
@@ -24,4 +25,8 @@ config:
         #pip install --yes --upgrade setuptools
         #   so install python3.11   
         python3.11 -m pip install Django
-
+devices:
+  http:
+    connect: tcp:127.0.0.1:8000
+    listen: tcp:127.0.0.1:8000
+    type: proxy
